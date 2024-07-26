@@ -1,0 +1,39 @@
+.navbar {
+    background-color: rgb(45, 0, 87);
+    font-weight: 500;
+    color: white;
+    text-align: center;
+    height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0 10px; 
+    box-sizing: border-box;
+}
+
+.navbar h2 {
+    margin: 0;
+    font-size: 30px;
+}
+
+@media (max-width: 768px) {
+    .navbar {
+        height: 50px; 
+        padding: 0 5px; 
+    }
+
+    .navbar h2 {
+        font-size: 24px; 
+    }
+}
+
+@media (max-width: 480px) {
+    .navbar {
+        height: 40px; 
+        padding: 0 5px; 
+    }
+
+    .navbar h2 {
+        font-size: 18px; 
+    }
+}
