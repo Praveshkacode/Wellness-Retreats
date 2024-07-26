@@ -9,9 +9,15 @@ const Page = () => {
   const [dateFilter, setDateFilter] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
-  const fetchData = async () => {
-    const apiUrl = "https://669f704cb132e2c136fdd9a0.mockapi.io/api/v1/retreats";
+  const fetchData = async (page = 1, searchQuery = '') => {
+    const limit = 3;
+    const apiUrl = searchQuery 
+      ? `https://669f704cb132e2c136fdd9a0.mockapi.io/api/v1/retreats?page=${page}&limit=${limit}&search=${searchQuery}`
+      : `https://669f704cb132e2c136fdd9a0.mockapi.io/api/v1/retreats?page=${page}&limit=${limit}`;
+    
     try {
       const response = await fetch(apiUrl);
       if (!response.ok) throw new Error('Not found');
@@ -20,6 +26,11 @@ const Page = () => {
       setCards(data);
       setFilteredCards(data);
       console.log(data);
+
+      const totalResponse = await fetch(`https://669f704cb132e2c136fdd9a0.mockapi.io/api/v1/retreats?search=${searchQuery}`);
+      if (!totalResponse.ok) throw new Error('Not found');
+      const totalData = await totalResponse.json();
+      setTotalPages(Math.ceil(totalData.length / limit));
     } catch (error) {
       console.error(error);
       setCards([]);
@@ -30,19 +41,16 @@ const Page = () => {
   const filterData = () => {
     let filtered = [...cards];
 
-    
     if (dateFilter) {
       const startDate = dateFilter === '2023-2024' ? new Date(2023, 0, 1).getTime() / 1000 : new Date(2024, 0, 1).getTime() / 1000;
       const endDate = dateFilter === '2023-2024' ? new Date(2024, 0, 1).getTime() / 1000 : new Date(2025, 0, 1).getTime() / 1000;
       filtered = filtered.filter(card => card.date >= startDate && card.date < endDate);
     }
 
-    
     if (typeFilter) {
       filtered = filtered.filter(card => card.tag.some(tag => tag.toLowerCase() === typeFilter.toLowerCase()));
     }
 
-    
     if (searchQuery) {
       filtered = filtered.filter(card => card.title.toLowerCase().includes(searchQuery.toLowerCase()));
     }
@@ -51,8 +59,8 @@ const Page = () => {
   };
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    fetchData(page, searchQuery);
+  }, [page, searchQuery]);
 
   useEffect(() => {
     filterData();
@@ -72,7 +80,19 @@ const Page = () => {
   };
 
   const handleSearch = () => {
-    filterData();
+    fetchData(1, searchQuery);
+  };
+
+  const handlePrevPage = () => {
+    if (page > 1) {
+      setPage(page - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (page < totalPages) {
+      setPage(page + 1);
+    }
   };
 
   return (
@@ -118,6 +138,11 @@ const Page = () => {
               <p>${card.price}</p>
             </div>
           ))}
+        </div>
+        <div className="pagination">
+          <button onClick={handlePrevPage} disabled={page === 1}>Prev</button>
+          <span>Page {page} of {totalPages}</span>
+          <button onClick={handleNextPage} disabled={page === totalPages}>Next</button>
         </div>
       </div>
     </div>
